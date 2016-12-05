@@ -9,7 +9,7 @@ def part1(input):
             password += str(hash[5])
         index += 1
         
-    return ''.join(password)
+    return password
 
 def part2(input):
     index, password = 0, [None] * 8
