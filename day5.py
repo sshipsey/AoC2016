@@ -1,41 +1,31 @@
 from hashlib import md5
 
 def part1(input):
-    hash = ''
-    index = 0
-    m = md5()
-    password = ''
+    index, password = 0, ''
     
-    while(len(password) < 8):
-        m.update(str.encode(str(input) + str(index)))
-        hash = m.hexdigest()
+    while(len(password) < 8):   
+        hash = md5(str.encode(str(input) + str(index))).hexdigest()
         if (hash.startswith('00000')):
             password += str(hash[5])
         index += 1
-        m = md5()
         
     return ''.join(password)
 
 def part2(input):
-    hash = ''
-    index = 0
-    m = md5()
-    password = [None for _ in range(8)]
+    index, password = 0, [None] * 8
     
     while(not all(password)):
-        m.update(str.encode(str(input) + str(index)))
-        hash = m.hexdigest()
-        if (hash.startswith('00000')):
-            try:
-                if (not password[int(hash[5])]):
-                    password[int(hash[5])] = hash[6]
-            except:
-                pass
+        hash = md5(str.encode(str(input) + str(index))).hexdigest()
+        if (hash.startswith('00000') and hash[5].isdigit() and int(hash[5]) < 8 and password[int(hash[5])] is None):
+            password[int(hash[5])] = hash[6]
         index += 1
-        m = md5()
         
     return ''.join(password)
+
+def day5(input):
+    return part1(input), part2(input)
     
 input = open('input.txt', 'r').read()
-print(part1(input))
-print(part2(input))
+
+a = day5(input)
+print(str.format('Part 1: {0}\nPart 2: {1}', a[0], a[1]))
