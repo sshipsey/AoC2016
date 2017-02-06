@@ -1,31 +1,68 @@
+import re
+
 class Board:
     def __init__(self):
-        self.screen = [[x + y * 50 for x in range(50)] for y in range(6)]
+        self.screen = [[False for x in range(50)] for y in range(6)]
+        
+        # Test Screen
+        #self.screen = [[False for x in range(7)] for y in range(3)]
     
     def toString(self):
         rstr = ''
         for r in self.screen:
-            rstr += '[' + ','.join([str(x) for x in r]) + ']\n'
+            rstr += ''.join(['#' if x else '.' for x in r]) + '\n'
         return rstr
     
-    def rotate(self, deg):
+    def rotateBoard(self, deg):
         if deg not in [0, 90, 180, 270, 360]: return
         
         if deg > 0: 
             self.screen = [list(x) for x in zip(*self.screen[::-1])]
-            self.rotate(deg - 90)
+            self.rotateBoard(deg - 90)
+
+    def turnOn(self, w, h):
+        for y in range(h): 
+            for x in range(w):   
+                self.screen[y][x] = True
+
+    def rotateSlice(self, axis, rowcol, distance):
+        if (axis == 'x'):
+            self.rotateBoard(90)
+            self.screen[rowcol] = rotateList(self.screen[rowcol], -distance)
+            self.rotateBoard(270)
+        elif (axis == 'y'):
+            self.screen[rowcol] = rotateList(self.screen[rowcol], distance)
 
 def rotateList(list, n):
     return list[-n:] + list[:-n]
 
+def getLineType(str):
+    if (str.startswith('rect')): return 0
+    elif (str.startswith('rotate')): return 1
+    else: return -1
+
 def day8(input):
+    keypad = Board()
 
-    matrix = Board()
-    
-    
+    for l in input.split('\n'):
+        if (getLineType(l) == 0):
+            m = re.match('rect (\d+)x(\d+)', l).groups()
+            keypad.turnOn(int(m[0]), int(m[1]))
+        elif (getLineType(l) == 1):
+            m = re.match('rotate (row|column) (x|y)=(\d+) by (\d+)', l).groups()
+            keypad.rotateSlice(m[1], int(m[2]), int(m[3]))
+        else:
+            print("Error, invalid line")
+
+    print(keypad.toString())
+
+    return sum((row.count(True) for row in keypad.screen))
 
 
-
+testInput = """rect 3x2
+rotate column x=1 by 1
+rotate row y=0 by 4
+rotate column x=1 by 1"""
 
 input = """rect 1x1
 rotate row y=0 by 5
@@ -172,4 +209,5 @@ rotate column x=11 by 5
 rotate column x=3 by 5
 rotate column x=2 by 5
 rotate column x=1 by 5"""
+
 print(day8(input))
